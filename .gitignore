@@ -1,0 +1,33 @@
+# Backend (Spring Boot / Maven)
+backend/backend/target/
+*.class
+*.jar
+
+# Frontend (Angular)
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+
+# ML Service (Python)
+ml-service/__pycache__/
+ml-service/venv/
+ml-service/.venv/
+*.pyc
+ml-service/models/*.pkl
+ml-service/models/*.joblib
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Secrets / config locale
+**/application-local.properties
+**/application-secrets.properties
+.env
+*.env
+
+# OS / logs
+Thumbs.db
+*.log
+logs/

@@ -1,0 +1,106 @@
+@use '@angular/material' as mat;
+
+:root {
+  --tt-red: #E30613;
+  --tt-blue: #0072BC;
+  --tt-green: #00A651;
+  --tt-yellow: #FFD700;
+  --tt-dark: #1a1a2e;
+  --tt-sidebar: #16213e;
+  --tt-card: #ffffff;
+  --tt-bg: #f4f6f9;
+  --tt-text: #2c3e50;
+  --tt-text-light: #7f8c8d;
+  --tt-border: #e0e0e0;
+  --tt-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: var(--tt-bg);
+  color: var(--tt-text);
+  font-size: 14px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--tt-text);
+    margin-bottom: 4px;
+  }
+  p {
+    color: var(--tt-text-light);
+    font-size: 14px;
+  }
+}
+
+.card {
+  background: var(--tt-card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--tt-shadow);
+  margin-bottom: 24px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.badge-danger { background: #fde8e8; color: #e30613; }
+  &.badge-warning { background: #fff3e0; color: #f57c00; }
+  &.badge-success { background: #e8f5e9; color: #2e7d32; }
+  &.badge-info { background: #e3f2fd; color: #1565c0; }
+  &.badge-secondary { background: #f5f5f5; color: #616161; }
+}
+
+.btn-tt {
+  background: var(--tt-red) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.btn-tt-outline {
+  border: 2px solid var(--tt-red) !important;
+  color: var(--tt-red) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+mat-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mat-mdc-header-row {
+  background: #f8f9fa !important;
+}
+
+.mat-mdc-header-cell {
+  font-weight: 700 !important;
+  color: var(--tt-text) !important;
+  font-size: 13px !important;
+}
+
+.mat-mdc-row:hover {
+  background: #f8f9fa !important;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #999; }
