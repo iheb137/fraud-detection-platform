@@ -21,6 +21,11 @@ jobs:
           cache: maven
       - name: Tests unitaires
         run: mvn -B test -Dtest='!BackendApplicationTests' -DfailIfNoTests=false
+      - name: Publier le rapport de couverture JaCoCo
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jacoco-report
+          path: backend/backend/target/site/jacoco/
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -35,6 +40,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - run: npx ng test --watch=false
       - run: npx ng build --configuration production
 
   ml-checks:
@@ -49,6 +55,8 @@ jobs:
           python-version: '3.13'
       - run: pip install -r requirements-docker.txt
       - run: python -m compileall app simulator
+      - run: pip install pytest
+      - run: python -m pytest tests -v
 
   docker-publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
