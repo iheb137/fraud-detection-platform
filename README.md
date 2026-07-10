@@ -7,6 +7,8 @@
 [![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular)](https://angular.dev/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-manifests-326CE5?logo=kubernetes&logoColor=white)](infra/k8s/)
 
+**Démo en ligne : https://fraud-detection-platform-brown.vercel.app** *(premier chargement : ~60 s si les services gratuits sont endormis)*
+
 Plateforme complète de détection de fraude télécom développée dans le cadre d'un stage ingénieur à la **DSI de Tunisie Telecom** (été 2026). Elle détecte en temps réel les schémas de fraude classiques de l'écosystème opérateur : **IRSF** (International Revenue Share Fraud), **Wangiri**, **SIM Boxing** et **PBX Hacking**.
 
 ## Fonctionnalités
