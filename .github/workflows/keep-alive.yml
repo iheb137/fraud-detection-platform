@@ -1,0 +1,16 @@
+name: Keep-alive
+
+on:
+  schedule:
+    # Toutes les 10 min, 7h-17h UTC (8h-18h Tunisie), lundi-vendredi
+    - cron: '*/10 7-17 * * 1-5'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: curl -s -o /dev/null -w "backend %{http_code}\n" https://fraud-backend-9w8t.onrender.com/actuator/health || true
+      - name: Ping ml
+        run: curl -s -o /dev/null -w "ml %{http_code}\n" https://fraud-detection-platform-gu8h.onrender.com/health || true
