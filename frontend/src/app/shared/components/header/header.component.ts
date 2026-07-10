@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, ViewEncapsulation, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -96,7 +96,7 @@ import { AuthService } from '../../../core/services/auth.service';
     body.dark-mode .user-name-sm { color: #e8eaf0 !important; }
     body.dark-mode .user-role-sm { color: #8b92a8 !important; }  `]
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
   @Output() themeToggle = new EventEmitter<void>();
   currentTime = new Date();
   dark = localStorage.getItem('theme') === 'dark';
@@ -104,9 +104,6 @@ export class HeaderComponent implements OnInit {
   constructor(public authService: AuthService) {
     setInterval(() => this.currentTime = new Date(), 1000);
   }
-
-  ngOnInit(): void {}
-
   onToggle(): void {
     this.dark = !this.dark;
     this.themeToggle.emit();

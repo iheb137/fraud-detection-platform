@@ -41,6 +41,7 @@ spec:
       labels:
         app: fraud-kafka
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: kafka
           image: apache/kafka:3.9.0
@@ -90,7 +91,9 @@ spec:
           resources:
             requests:
               memory: "384Mi"
+              ephemeral-storage: "512Mi"
               cpu: "100m"
             limits:
               memory: "768Mi"
+              ephemeral-storage: "1Gi"
               cpu: "500m"
