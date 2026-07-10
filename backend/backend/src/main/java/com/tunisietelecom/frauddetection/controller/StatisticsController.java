@@ -41,7 +41,7 @@ public class StatisticsController {
     }
 
     /** null = global ; sinon liste effective du perimetre. */
-    private List<Long> resolveScope(User user, List<Long> adminIds) {
+    List<Long> resolveScope(User user, List<Long> adminIds) {
         if (user.getRole() == Role.ADMIN) {
             return List.of(user.getId());
         }
