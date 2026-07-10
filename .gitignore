@@ -31,3 +31,6 @@ ml-service/models/*.joblib
 Thumbs.db
 *.log
 logs/
+
+# K8s secrets reels (utiliser 01-secrets.example.yaml comme modele)
+infra/k8s/01-secrets.yaml
