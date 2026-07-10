@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-postgres
+  namespace: fraud-detection
+spec:
+  clusterIP: None
+  selector:
+    app: fraud-postgres
+  ports:
+    - port: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fraud-postgres
+  namespace: fraud-detection
+spec:
+  serviceName: fraud-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fraud-postgres
+  template:
+    metadata:
+      labels:
+        app: fraud-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "fraud_detection"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
