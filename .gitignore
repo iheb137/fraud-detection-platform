@@ -13,7 +13,7 @@ ml-service/__pycache__/
 ml-service/venv/
 ml-service/.venv/
 *.pyc
-ml-service/models/*.pkl
+ml-service/models/fraud_model_candidate.pkl
 ml-service/models/*.joblib
 
 # IDE
