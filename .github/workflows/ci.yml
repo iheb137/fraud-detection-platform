@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   backend-tests:
+    name: Backend - tests JUnit + couverture
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,6 +26,21 @@ jobs:
           cache: maven
       - name: Tests unitaires
         run: mvn -B test -Dtest='!BackendApplicationTests' -DfailIfNoTests=false
+      - name: Rapport de tests JUnit (detail + annotations)
+        uses: mikepenz/action-junit-report@3585e9575db828022551b4231f165eb59a0e74e3 # v5
+        if: always()
+        with:
+          report_paths: 'backend/backend/target/surefire-reports/TEST-*.xml'
+          check_name: Resultats tests backend
+          detailed_summary: true
+          include_passed: true
+      - name: Couverture JaCoCo dans le resume
+        if: always()
+        run: |
+          if [ -f target/site/jacoco/jacoco.csv ]; then
+            echo "### Couverture backend (JaCoCo)" >> $GITHUB_STEP_SUMMARY
+            awk -F, 'NR>1 {t+=$4+$5; c+=$5} END {printf "Instructions couvertes : **%.1f%%** (%d / %d)\n", 100*c/t, c, t}' target/site/jacoco/jacoco.csv >> $GITHUB_STEP_SUMMARY
+          fi
       - name: Publier le rapport de couverture JaCoCo
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -28,6 +48,7 @@ jobs:
           path: backend/backend/target/site/jacoco/
 
   frontend-build:
+    name: Frontend - tests Vitest + build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,10 +61,17 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npx ng test --watch=false
-      - run: npx ng build --configuration production
+      - name: Tests Vitest
+        run: |
+          set -o pipefail
+          npx ng test --watch=false 2>&1 | tee vitest.log
+          echo "### Tests frontend (Vitest)" >> $GITHUB_STEP_SUMMARY
+          grep -E "Test Files|Tests " vitest.log | sed 's/^ *//' >> $GITHUB_STEP_SUMMARY
+      - name: Build production
+        run: npx ng build --configuration production
 
   ml-checks:
+    name: ML - tests pytest
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,11 +82,21 @@ jobs:
         with:
           python-version: '3.13'
       - run: pip install -r requirements-docker.txt
-      - run: python -m compileall app simulator
       - run: pip install pytest
-      - run: python -m pytest tests -v
+      - run: python -m compileall app simulator
+      - name: Tests pytest
+        run: python -m pytest tests -v --junitxml=pytest-report.xml
+      - name: Rapport pytest (detail + annotations)
+        uses: mikepenz/action-junit-report@3585e9575db828022551b4231f165eb59a0e74e3 # v5
+        if: always()
+        with:
+          report_paths: 'ml-service/pytest-report.xml'
+          check_name: Resultats tests ML
+          detailed_summary: true
+          include_passed: true
 
   docker-publish:
+    name: Publication Docker Hub
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [backend-tests, frontend-build, ml-checks]
     runs-on: ubuntu-latest
