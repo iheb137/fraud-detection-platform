@@ -64,6 +64,8 @@ public class PredictionController {
         if (user.getRole() != Role.ANALYSTE) {
             return ResponseEntity.status(403).build();
         }
+
+        //need to change var name
         var p = predictionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prediction not found: " + id));
         p.setAnalystLabel(label);

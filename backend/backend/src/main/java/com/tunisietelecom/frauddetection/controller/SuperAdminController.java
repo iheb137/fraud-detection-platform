@@ -1,5 +1,6 @@
 package com.tunisietelecom.frauddetection.controller;
 
+import com.tunisietelecom.frauddetection.domain.entity.SystemConfig;
 import com.tunisietelecom.frauddetection.domain.entity.User;
 import com.tunisietelecom.frauddetection.domain.enums.AlertStatus;
 import com.tunisietelecom.frauddetection.domain.enums.Role;
@@ -16,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -43,6 +46,7 @@ public class SuperAdminController {
     private final AlertRepository alertRepository;
     private final TicketRepository ticketRepository;
     private final InterventionRepository interventionRepository;
+    private final SystemConfigRepository systemConfigRepository;
     private final RestTemplate restTemplate;
 
     private boolean forbidden(Authentication auth) {
@@ -114,6 +118,33 @@ public class SuperAdminController {
             f.cancel(true);
             return Map.of("status", "DOWN");
         }
+    }
+
+    // ------- Gouvernance : seuil de detection ML -------
+    @GetMapping("/config/threshold")
+    @Operation(summary = "Seuil de detection courant")
+    public ResponseEntity<Map<String, Object>> getThreshold(Authentication auth) {
+        if (forbidden(auth)) return ResponseEntity.status(403).build();
+        double v = systemConfigRepository.findByConfigKey("fraud_threshold")
+                .map(c -> Double.parseDouble(c.getConfigValue())).orElse(0.7);
+        return ResponseEntity.ok(Map.of("threshold", v));
+    }
+
+    @PutMapping("/config/threshold")
+    @Operation(summary = "Mise a jour du seuil de detection (0.50 - 0.95)")
+    public ResponseEntity<Map<String, Object>> setThreshold(@RequestParam double value, Authentication auth) {
+        if (forbidden(auth)) return ResponseEntity.status(403).build();
+        if (value < 0.5 || value > 0.95) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Le seuil doit etre entre 0.50 et 0.95"));
+        }
+        SystemConfig c = systemConfigRepository.findByConfigKey("fraud_threshold")
+                .orElseGet(() -> SystemConfig.builder()
+                        .configKey("fraud_threshold")
+                        .description("Seuil de detection de fraude")
+                        .build());
+        c.setConfigValue(String.valueOf(value));
+        systemConfigRepository.save(c);
+        return ResponseEntity.ok(Map.of("threshold", value));
     }
 
     @GetMapping("/users-activity")
