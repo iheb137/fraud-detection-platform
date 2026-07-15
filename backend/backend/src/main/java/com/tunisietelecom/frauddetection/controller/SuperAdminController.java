@@ -46,25 +46,44 @@ public class SuperAdminController {
     private final RestTemplate restTemplate;
 
     private boolean forbidden(Authentication auth) {
+        if (auth == null) return true; // non authentifie => 403 propre, jamais de 500
         User u = userRepository.findByEmail(auth.getName()).orElseThrow();
         return u.getRole() != Role.SUPERADMIN;
     }
 
+    // ------- Sante plateforme : checks paralleles + cache (15 s) -------
+    private final java.util.concurrent.ExecutorService healthExecutor =
+            java.util.concurrent.Executors.newFixedThreadPool(3, r -> {
+                Thread t = new Thread(r, "health-check");
+                t.setDaemon(true);
+                return t;
+            });
+    private volatile Map<String, Object> healthCache;
+    private volatile long healthCacheAt = 0L;
+    private static final long HEALTH_CACHE_TTL_MS = 15000;
+
     @GetMapping("/platform-health")
     @Operation(summary = "Sante des services + volumetrie globale")
-    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> platformHealth(Authentication auth) {
         if (forbidden(auth)) return ResponseEntity.status(403).build();
+        Map<String, Object> cached = healthCache;
+        if (cached != null && System.currentTimeMillis() - healthCacheAt < HEALTH_CACHE_TTL_MS) {
+            return ResponseEntity.ok(cached);
+        }
+        // Checks en PARALLELE, timeout strict par service : la latence totale
+        // est bornee par le check le plus lent, jamais par leur somme, et la
+        // panne d un service n empeche jamais d afficher les autres.
+        var pgF = java.util.concurrent.CompletableFuture.supplyAsync(this::postgresHealth, healthExecutor);
+        var mlF = java.util.concurrent.CompletableFuture.supplyAsync(this::mlHealth, healthExecutor);
+        var kafkaF = java.util.concurrent.CompletableFuture.supplyAsync(this::kafkaHealth, healthExecutor);
 
         Map<String, Object> services = new LinkedHashMap<>();
-        // PostgreSQL : implicite - si ce count repond, la DB est up
-        long users = userRepository.count();
-        services.put("postgres", Map.of("status", "UP"));
-        services.put("ml", mlHealth());
-        services.put("kafka", kafkaHealth());
+        services.put("postgres", awaitOrDown(pgF, 1500));
+        services.put("ml", awaitOrDown(mlF, 1500));
+        services.put("kafka", awaitOrDown(kafkaF, 2500));
 
         Map<String, Object> volumetry = new LinkedHashMap<>();
-        volumetry.put("users", users);
+        volumetry.put("users", userRepository.count());
         volumetry.put("activeUsers", userRepository.findAll().stream()
                 .filter(u -> Boolean.TRUE.equals(u.getIsActive())).count());
         volumetry.put("batches", importBatchRepository.count());
@@ -78,7 +97,23 @@ public class SuperAdminController {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("services", services);
         body.put("volumetry", volumetry);
+        healthCache = body;
+        healthCacheAt = System.currentTimeMillis();
         return ResponseEntity.ok(body);
+    }
+
+    private Map<String, Object> postgresHealth() {
+        userRepository.count();
+        return Map.of("status", "UP");
+    }
+
+    private Map<String, Object> awaitOrDown(java.util.concurrent.CompletableFuture<Map<String, Object>> f, long timeoutMs) {
+        try {
+            return f.get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            f.cancel(true);
+            return Map.of("status", "DOWN");
+        }
     }
 
     @GetMapping("/users-activity")
