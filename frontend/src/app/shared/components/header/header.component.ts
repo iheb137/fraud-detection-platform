@@ -36,15 +36,23 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
           <mat-icon>expand_more</mat-icon>
         </button>
-        <mat-menu #userMenu="matMenu">
-          <div class="menu-header">
-            <strong>{{ getUserName() }}</strong>
-            <small>{{ getCurrentUser()?.email }}</small>
+        <mat-menu #userMenu="matMenu" class="tt-user-menu" xPosition="before">
+          <div class="ttm-head" (click)="$event.stopPropagation()">
+            <div class="ttm-avatar">{{ getUserInitials() }}</div>
+            <div class="ttm-id">
+              <strong>{{ getUserName() }}</strong>
+              <small>{{ getCurrentUser()?.email }}</small>
+              <span class="ttm-role">{{ getUserRole() }}</span>
+            </div>
           </div>
+          <button mat-menu-item class="ttm-item" routerLink="/profile">
+            <mat-icon>person</mat-icon>
+            <span>Mon profil</span>
+          </button>
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon color="warn">logout</mat-icon>
-            <span>Deconnexion</span>
+          <button mat-menu-item class="ttm-item ttm-logout" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Se d&eacute;connecter</span>
           </button>
         </mat-menu>
       </div>
@@ -83,9 +91,35 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     .user-name-sm { display: block; font-size: 13px; font-weight: 600; color: #2c3e50; line-height: 1.2; }
     .user-role-sm { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; }
-    .menu-header { padding: 12px 16px; }
-    .menu-header strong { display: block; font-size: 14px; }
-    .menu-header small { color: #999; font-size: 12px; }
+
+    /* ===== Menu utilisateur (panneau CDK, encapsulation none requise) ===== */
+    .tt-user-menu.mat-mdc-menu-panel {
+      border-radius: 14px !important; min-width: 264px !important; overflow: hidden;
+      box-shadow: 0 18px 50px rgba(11, 30, 51, .22) !important; margin-top: 8px;
+    }
+    .tt-user-menu .mat-mdc-menu-content { padding: 0 !important; }
+    .ttm-head {
+      display: flex; align-items: center; gap: 12px; padding: 16px;
+      background: linear-gradient(120deg, #0b1e33, #0072BC); color: #fff; cursor: default;
+    }
+    .ttm-avatar {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.4);
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;
+    }
+    .ttm-id { min-width: 0; }
+    .ttm-id strong { display: block; font-size: 14px; line-height: 1.2; }
+    .ttm-id small { display: block; font-size: 11px; opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ttm-role {
+      display: inline-block; margin-top: 5px; font-size: 9.5px; font-weight: 800; letter-spacing: .08em;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+      padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
+    }
+    .ttm-item { height: 46px !important; font-size: 13.5px !important; }
+    .ttm-item mat-icon { color: #486581; }
+    .ttm-item:hover { background: #f0f5fa !important; }
+    .ttm-logout, .ttm-logout mat-icon { color: #c62828 !important; }
+    .ttm-logout:hover { background: #fdecea !important; }
 
     /* DARK MODE */
     body.dark-mode .app-header { background: #1e2130 !important; border-bottom-color: rgba(255,255,255,0.08) !important; }
@@ -94,7 +128,11 @@ import { AuthService } from '../../../core/services/auth.service';
     body.dark-mode .header-divider { background: rgba(255,255,255,0.08) !important; }
     body.dark-mode .theme-btn { background: #252838 !important; border-color: rgba(255,255,255,0.1) !important; }
     body.dark-mode .user-name-sm { color: #e8eaf0 !important; }
-    body.dark-mode .user-role-sm { color: #8b92a8 !important; }  `]
+    body.dark-mode .user-role-sm { color: #8b92a8 !important; }
+    body.dark-mode .tt-user-menu.mat-mdc-menu-panel { background: #1e2130 !important; }
+    body.dark-mode .ttm-item { color: #e8eaf0 !important; }
+    body.dark-mode .ttm-item:hover { background: #252838 !important; }
+  `]
 })
 export class HeaderComponent {
   @Output() themeToggle = new EventEmitter<void>();

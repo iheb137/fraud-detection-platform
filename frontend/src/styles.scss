@@ -131,3 +131,6 @@ body.dark-mode .skl::after { background: linear-gradient(90deg, transparent, rgb
 .toast.success, .toast.toast-success, .sa-toast.success { background: #0d7a43 !important; color: #fff !important; }
 .toast.error, .toast.toast-error, .sa-toast.error { background: #c62828 !important; color: #fff !important; }
 @keyframes ttToastIn { from { transform: translateY(16px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ===== Les overlays Material (menus, tooltips) passent au-dessus du contenu ===== */
+.cdk-overlay-container { z-index: 5000 !important; }
