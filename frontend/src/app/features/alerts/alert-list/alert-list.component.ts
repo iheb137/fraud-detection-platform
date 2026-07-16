@@ -34,7 +34,9 @@ import { Alert } from '../../../core/models/alert';
 
     <div class="card">
       <div class="loading-overlay" *ngIf="loading">
-        <mat-spinner diameter="40"></mat-spinner>
+        <div class="skl-stack">
+          <div class="skl skl-row" *ngFor="let i of [1,2,3,4,5,6]"></div>
+        </div>
       </div>
 
       <table mat-table [dataSource]="alerts" *ngIf="!loading">

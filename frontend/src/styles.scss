@@ -104,3 +104,30 @@ mat-table {
 ::-webkit-scrollbar-track { background: #f1f1f1; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #999; }
+/* ===== Transition douce entre les pages ===== */
+router-outlet + * { display: block; animation: pageFade .28s ease; }
+@keyframes pageFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ===== Skeleton loaders ===== */
+.skl { position: relative; overflow: hidden; background: #e9eef3; border-radius: 10px; }
+.skl::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+  animation: sklShimmer 1.2s infinite; }
+@keyframes sklShimmer { to { transform: translateX(100%); } }
+body.dark-mode .skl { background: #232635; }
+body.dark-mode .skl::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); }
+.skl-kpi { height: 112px; }
+.skl-stack { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.skl-row { height: 44px; }
+
+/* ===== Toasts unifies (toutes les pages) ===== */
+.toast, .sa-toast {
+  position: fixed !important; bottom: 28px !important; right: 28px !important; left: auto !important; top: auto !important;
+  min-width: 260px; max-width: 380px; padding: 13px 18px !important; border-radius: 10px !important;
+  font-weight: 600; font-size: .88rem; z-index: 10000;
+  box-shadow: 0 10px 30px rgba(16, 42, 67, .28) !important; border: none !important;
+  animation: ttToastIn .3s cubic-bezier(.21, 1.02, .73, 1) !important;
+}
+.toast.success, .toast.toast-success, .sa-toast.success { background: #0d7a43 !important; color: #fff !important; }
+.toast.error, .toast.toast-error, .sa-toast.error { background: #c62828 !important; color: #fff !important; }
+@keyframes ttToastIn { from { transform: translateY(16px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }

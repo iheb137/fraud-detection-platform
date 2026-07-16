@@ -12,6 +12,10 @@ export class AuthService {
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
+  // Overlay global de transition (connexion / deconnexion)
+  private transitionSubject = new BehaviorSubject<string | null>(null);
+  transition$ = this.transitionSubject.asObservable();
+
   constructor(private http: HttpClient, private router: Router) {}
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -19,21 +23,30 @@ export class AuthService {
       tap(response => {
         localStorage.setItem(this.TOKEN_KEY, response.accessToken);
         localStorage.setItem(this.USER_KEY, JSON.stringify(response));
-        this.isLoggedInSubject.next(true);
-        if (response.role === 'SUPERADMIN') {
-          this.router.navigate(['/superadmin']);
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
+        const first = (response as any).firstName || '';
+        this.transitionSubject.next(first ? `Bienvenue, ${first} !` : 'Bienvenue !');
+        setTimeout(() => {
+          this.isLoggedInSubject.next(true);
+          if (response.role === 'SUPERADMIN') {
+            this.router.navigate(['/superadmin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+          setTimeout(() => this.transitionSubject.next(null), 450);
+        }, 900);
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.isLoggedInSubject.next(false);
-    this.router.navigate(['/login']);
+    this.transitionSubject.next('Deconnexion en cours...');
+    setTimeout(() => {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
+      this.isLoggedInSubject.next(false);
+      this.router.navigate(['/login']);
+      setTimeout(() => this.transitionSubject.next(null), 450);
+    }, 700);
   }
 
   getToken(): string | null { return localStorage.getItem(this.TOKEN_KEY); }

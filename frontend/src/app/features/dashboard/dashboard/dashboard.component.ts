@@ -66,7 +66,9 @@ import { RetrainWidgetComponent } from '../../../shared/components/retrain-widge
       </div>
 
       <ng-template #loadingKpis>
-        <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+        <div class="kpi-grid">
+          <div class="skl skl-kpi" *ngFor="let i of [1,2,3,4]"></div>
+        </div>
       </ng-template>
 
       <div class="card fraud-rate-card" *ngIf="kpis">
