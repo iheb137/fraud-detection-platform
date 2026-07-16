@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -39,41 +39,20 @@ import { AuthService } from '../../../core/services/auth.service';
             <p>Systeme intelligent base sur le Machine Learning pour proteger le reseau telephonique tunisien.</p>
           </div>
 
-          <div class="features-grid">
-            <div class="feature-item">
-              <div class="feature-icon red">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div class="feature-text">
-                <strong>Detection temps reel</strong>
-                <small>Surveillance 24h/24</small>
-              </div>
+          <div class="live-feed">
+            <div class="lf-head">
+              <span class="lf-dot"></span>
+              <span class="lf-title">Analyse en direct</span>
+              <span class="lf-badge">simulation</span>
             </div>
-            <div class="feature-item">
-              <div class="feature-icon blue">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-              </div>
-              <div class="feature-text">
-                <strong>Machine Learning</strong>
-                <small>Random Forest AI</small>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              </div>
-              <div class="feature-text">
-                <strong>Dashboard analytique</strong>
-                <small>KPIs en temps reel</small>
-              </div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon yellow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              </div>
-              <div class="feature-text">
-                <strong>Alertes automatiques</strong>
-                <small>Notification instantanee</small>
+            <div class="lf-rows">
+              <div class="lf-row" *ngFor="let f of feed" [class.fraud]="f.fraud">
+                <span class="lf-time">{{ f.time }}</span>
+                <span class="lf-num">{{ f.num }}</span>
+                <span class="lf-country">{{ f.country }}</span>
+                <div class="lf-score"><div class="lf-score-fill" [style.width.%]="f.score"></div></div>
+                <span class="lf-pct">{{ f.score }}%</span>
+                <span class="lf-verdict">{{ f.fraud ? 'FRAUDE' : 'LEGIT' }}</span>
               </div>
             </div>
           </div>
@@ -166,6 +145,34 @@ import { AuthService } from '../../../core/services/auth.service';
     .platform-info h2 { font-size: 34px; font-weight: 800; line-height: 1.25; margin: 0 0 16px 0; }
     .platform-info p { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 460px; line-height: 1.6; margin: 0 0 36px 0; }
     .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 580px; }
+    /* ===== Flux de detection live ===== */
+    .live-feed { max-width: 580px; background: rgba(8, 18, 32, 0.55); border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 16px; backdrop-filter: blur(10px); overflow: hidden; }
+    .lf-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .lf-dot { width: 9px; height: 9px; border-radius: 50%; background: #00A651; animation: lfPulse 1.4s ease-out infinite; }
+    @keyframes lfPulse { 0% { box-shadow: 0 0 0 0 rgba(0,166,81,.5); } 100% { box-shadow: 0 0 0 9px rgba(0,166,81,0); } }
+    .lf-title { color: #fff; font-weight: 700; font-size: .86rem; letter-spacing: .02em; }
+    .lf-badge { margin-left: auto; font-size: .62rem; color: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.3); padding: 2px 8px; border-radius: 12px;
+      text-transform: uppercase; letter-spacing: .08em; }
+    .lf-rows { padding: 6px 0; }
+    .lf-row { display: flex; align-items: center; gap: 12px; padding: 8px 16px;
+      animation: lfIn .35s ease; }
+    .lf-row + .lf-row { border-top: 1px solid rgba(255,255,255,0.05); }
+    @keyframes lfIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .lf-time { font-family: 'Consolas', monospace; font-size: .72rem; color: rgba(255,255,255,.45); width: 58px; }
+    .lf-num { font-family: 'Consolas', monospace; font-size: .78rem; color: #fff; width: 128px; }
+    .lf-country { font-size: .72rem; font-weight: 700; color: rgba(255,255,255,.75); width: 26px; }
+    .lf-score { flex: 1; height: 5px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+    .lf-score-fill { height: 100%; border-radius: 4px; background: #00A651; transition: width .4s; }
+    .lf-row.fraud .lf-score-fill { background: #E30613; }
+    .lf-pct { font-family: 'Consolas', monospace; font-size: .74rem; color: rgba(255,255,255,.8); width: 38px; text-align: right; }
+    .lf-verdict { font-size: .64rem; font-weight: 800; letter-spacing: .06em; padding: 3px 9px;
+      border-radius: 12px; width: 58px; text-align: center;
+      background: rgba(0,166,81,.18); color: #4be08d; border: 1px solid rgba(0,166,81,.4); }
+    .lf-row.fraud .lf-verdict { background: rgba(227,6,19,.18); color: #ff6b74; border-color: rgba(227,6,19,.45);
+      animation: lfPulse 1.4s ease-out infinite; }
     .feature-item {
       display: flex; align-items: center; gap: 14px;
       background: rgba(255,255,255,0.05);
@@ -333,7 +340,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   loginForm: FormGroup;
   loading = false;
   errorMessage = '';
@@ -349,6 +356,39 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
+    this.startFeed();
+  }
+
+  // ----- Flux de detection simule (page publique : aucune donnee reelle) -----
+  feed: Array<{ time: string; num: string; country: string; score: number; fraud: boolean }> = [];
+  private feedTimer: any;
+  private readonly legitCountries = ['TN', 'TN', 'TN', 'FR', 'DE', 'IT', 'MA'];
+  private readonly fraudCountries = ['LV', 'CU', 'SL', 'GN', 'MC', 'SO'];
+
+  private startFeed(): void {
+    for (let i = 0; i < 5; i++) { this.pushFeedRow(); }
+    this.feedTimer = setInterval(() => this.pushFeedRow(), 2000);
+  }
+
+  private pushFeedRow(): void {
+    const fraud = Math.random() < 0.25;
+    const d = () => Math.floor(Math.random() * 10);
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    this.feed.unshift({
+      time: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+      num: `+216 ${d()}${d()} XXX X${d()}${d()}`,
+      country: fraud
+        ? this.fraudCountries[Math.floor(Math.random() * this.fraudCountries.length)]
+        : this.legitCountries[Math.floor(Math.random() * this.legitCountries.length)],
+      score: fraud ? 70 + Math.floor(Math.random() * 29) : 2 + Math.floor(Math.random() * 38),
+      fraud
+    });
+    if (this.feed.length > 6) { this.feed.pop(); }
+  }
+
+  ngOnDestroy(): void {
+    if (this.feedTimer) { clearInterval(this.feedTimer); }
   }
 
   onSubmit(): void {
